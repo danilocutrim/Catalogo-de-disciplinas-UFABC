@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
 	id("org.springframework.boot") version "2.3.3.RELEASE"
@@ -7,31 +7,53 @@ plugins {
 	kotlin("plugin.spring") version "1.3.72"
 }
 
-group = "br.com.ufabc"
-version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-
 repositories {
+	jcenter()
 	mavenCentral()
 }
 
-dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("org.apache.pdfbox:pdfbox:2.0.20")
-	testImplementation("org.springframework.boot:spring-boot-starter-test") {
-		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+subprojects{
+	group = "br.com.ufabc"
+	version = "0.0.1-SNAPSHOT"
+	apply(plugin = "kotlin")
+	apply(plugin = "idea")
+	apply(plugin = "kotlin-spring")
+	apply(plugin = "io.spring.dependency-management")
+	apply(plugin = "org.springframework.boot")
+
+
+	repositories {
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		testImplementation("org.mockito:mockito-core:2.21.0")
+		testImplementation("com.nhaarman:mockito-kotlin:1.6.0")
+		testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+		testImplementation("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+		testImplementation("org.assertj:assertj-core:3.16.1")
+		testImplementation("org.jeasy:easy-random-core:4.2.0")
+		testImplementation("io.rest-assured:rest-assured:4.3.0")
+		testImplementation("org.mockito:mockito-inline:3.3.3")
+	}
+
+	tasks.compileKotlin {
+		kotlinOptions {
+			freeCompilerArgs = listOf("-Xjvm-default=enable")
+			allWarningsAsErrors = false
+			jvmTarget = "1.8"
+		}
+	}
+	tasks.withType<Test> {
+		useJUnitPlatform()
 	}
 }
 
-tasks.withType<Test> {
-	useJUnitPlatform()
+tasks.getByName<BootJar>("bootJar") {
+	enabled = false
 }
 
-tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "1.8"
-	}
+tasks.getByName<Jar>("jar") {
+	enabled = true
 }
+
